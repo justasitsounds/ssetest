@@ -11,6 +11,15 @@ import (
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+
+	f, _ := os.Create("/var/log/golang/golang-server.log")
+	defer f.Close()
+	log.SetOutput(f)
+
 	l := log.New(os.Stderr, "", log.LUTC)
 	b := sse.NewBroker(*l)
 
@@ -28,7 +37,8 @@ func main() {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, "<html><head><style type=\"text/css\">%s</style></head><body><script type=\"text/javascript\">(%s)()</script></body></html>", clientSideStyles(), clientSideCode())
 	})
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Printf("Listening on port")
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func clientSideCode() string {
